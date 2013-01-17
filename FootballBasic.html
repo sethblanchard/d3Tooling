@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Football Landscape</title>
+
+    <style>
+
+
+      body {
+        font: 10px sans-serif;
+      }
+
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+        width:1px;
+      }
+
+      .area {
+        fill: steelblue;
+      }
+
+      .line{
+        fill: none;
+        stroke: blue;
+        width:2px;
+      }
+
+    </style>
+
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script>
+    
+    function update(values) {
+      
+        d3.selectAll(".area")
+            .data([values])
+          .transition()
+            .duration(1500)
+            .attr("d", area);
+        d3.selectAll(".line")
+            .data([values])
+          .transition()
+            .duration(1500)
+            .attr("d", line);
+    }
+
+    </script>
+</head>
+<body>
+    <header>
+        <h1>NFC East Small Multiples</h1>
+        <ul>
+            <li><a href="#redskins">Washington Redskins</a></li>
+        </ul>
+    </header>
+    <section id="charts">
+        <a id="toggle" href="#toggle">Toggle</a>
+
+    </section>
+
+    <select id="year">
+      <option selected="selected" value="0">2002</option>
+      <option value="1">2003</option>
+      <option value="2">2004</option>
+      <option value="3">2005</option>
+      <option value="4">2006</option>
+      <option value="5">2007</option>
+      <option value="6">2008</option>
+      <option value="7">2009</option>
+      <option value="8">2010</option>
+      <option value="9">2011</option>
+    </select>
+
+    <section id="explination">
+        <p>
+            Using Small Multiples to survey the landscape of the NFL over the last 10 years.
+        </p>
+    </section>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.3.min.js"><\/script>')</script>
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        "use strict";
+
+
+        var d = [
+            [1,1,1,2,2,2,3,4,4,4,5,5,5,5,6,7],
+            [1,2,2,3,3,3,3,3,4,4,4,4,5,5,5,5],
+            [1,1,1,1,1,2,2,3,3,3,3,4,4,5,5,6],
+            [1,2,3,3,3,4,4,5,5,5,5,6,7,8,9,10],
+            [0,0,1,2,2,2,2,3,3,3,4,4,4,5,5,5],
+            [1,2,2,3,3,4,4,5,5,5,5,5,6,7,8,9],
+            [0,1,2,3,4,4,5,6,6,6,7,7,7,7,8,8],
+            [0,1,1,2,2,2,2,2,3,3,3,3,4,4,4,4],
+            [1,1,1,2,3,3,4,4,4,5,5,5,5,5,6,6],
+            [1,2,2,3,3,3,3,3,3,3,4,4,4,5,5,5]
+          ];
+
+
+
+      var margin = 25,
+          width = 500,
+          height = 300;
+      
+      var value =0;
+
+      var x_extent = [1,16];
+      var x_scale = d3.scale.linear()
+                            .range([margin, width-margin])
+                            .domain(x_extent);
+      
+      var y_extent = [0, 16],
+          y_over_extent = [-16,16]
+
+      var y_scale = d3.scale.linear()
+                .range([height-margin, margin])
+                .domain(y_extent);
+          y_over_scale = d3.scale.linear()
+                .range([height-margin, margin])
+                .domain(y_over_extent);
+
+      var area = d3.svg.area()
+          .x(function(d,i) { 
+            return x_scale(i+1); })
+          .y0(height)
+          .y1(function(d) { 
+            return y_scale(d); });
+
+      var area_over = d3.svg.area()
+          .x(function(d,i) { 
+            return x_scale(i+1); })
+          .y0(function(d) { 
+            return (d >= 0) ? height/2 : y_scale(d); })
+          .y1(function(d) { 
+            return (d <= 0) ? height/2 : y_scale(d); });
+
+      var line = d3.svg.line()
+          .x(function(d,i) { 
+            return x_scale(i+1); })
+          .y(function(d) { 
+            return y_scale(d); });
+
+      var xAxis = d3.svg.axis()
+          .scale(x_scale)
+          .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+          .scale(y_scale)
+          .orient("left"),
+        y_over_over_Axis = d3.svg.axis()
+          .scale(y_scale)
+          .orient("left");
+
+      var svg = d3.select("#charts").append("svg")
+          .attr("width", width + margin + margin)
+          .attr("height", height + margin + margin)
+        .append("g")
+          .attr("transform", "translate(" + margin + "," + margin + ")");
+
+      svg.append("path")
+        .data([d[value]])
+        .attr("class", "area")
+        .attr("d", area);
+
+      svg.append("path")
+        .data([d[value]])
+        .attr("class", "line")
+        .attr("d", line);
+
+      svg.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+      svg.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", "translate(0," + height/2 + ")")
+        .call(xAxis);
+
+      svg.append("g")
+          .attr("class", "y-axis")
+          .attr("transform", "translate(" + margin + "," + margin + ")")
+          .call(yAxis)
+        .append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("Wins");
+
+
+        //d3.csv('was10.csv', draw);
+       //Query Stuff to be pulled into main 
+      $(document).ready(function(){
+
+          $('#year').bind('change', function(){
+
+              var val = $('#year option:selected').val(); 
+              update(d[val]);
+          });
+      });
+    </script>
+   
+</body>
+</html>
